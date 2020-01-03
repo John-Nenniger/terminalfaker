@@ -190,17 +190,14 @@ export class Terminal {
   autoCompleteCommands(input) {
     const suggestions = [];
     const customCommands = this.commands
-
     const re = new RegExp("^" + input, "ig")
     for (let command in customCommands) {
       if(customCommands.hasOwnProperty(command) && command.match(re)) {
         suggestions.push(command);
       }
     }
-
     const prototype = Object.getPrototypeOf(this.commands)
     const prototypeCommands = Object.getOwnPropertyNames(prototype)
-    
     for(let command of prototypeCommands){
       if(prototype.hasOwnProperty(command) && command.match(re)){
         suggestions.push(command);
@@ -259,7 +256,7 @@ export class Terminal {
 
   bootTerminalMessage(terminal, bootElement, introLines, num) {
     if (num == 0) {
-        // First hide the prompt and clear any defaul message:
+        // First hide the prompt and clear any default message:
         terminal.querySelector(".hidden").style.display = 'none';
         bootElement.innerHTML = "";
     }
@@ -303,6 +300,7 @@ export class Terminal {
     elem.addEventListener("keydown", (event) => {
       if (event.keyCode == KEY_CODE_MAP.KEY_TAB) {
         var prompt = event.target;
+        const existingText = prompt.textContent
         var suggestions = this.autoCompleteInput(prompt.textContent);
 
         if (suggestions.length == 1) {
@@ -310,6 +308,22 @@ export class Terminal {
           var range = document.createRange();
           var sel = window.getSelection();
           range.setStart(prompt.childNodes[0], suggestions[0].length);
+          range.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } else if (suggestions.length > 1) {
+          // if there is more than one suggestion, do what a real prompt would do
+          // and print a new line with all of the possibilities on it
+          // print a line with all of the suggestions
+          this.displayStdout(elem, suggestions.join(" "));
+          // reset the prompt
+          this.resetPrompt(elem, prompt, false)
+          // then add back on the text that was already being typed
+          const newPrompt = document.querySelector("[contenteditable=true]");
+          newPrompt.textContent = existingText
+          var range = document.createRange();
+          var sel = window.getSelection();
+          range.setStart(newPrompt.childNodes[0], existingText.length);
           range.collapse(true);
           sel.removeAllRanges();
           sel.addRange(range);
