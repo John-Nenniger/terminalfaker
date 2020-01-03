@@ -312,13 +312,8 @@ export class Terminal {
           sel.removeAllRanges();
           sel.addRange(range);
         } else if (suggestions.length > 1) {
-          // if there is more than one suggestion, do what a real prompt would do
-          // and print a new line with all of the possibilities on it
-          // print a line with all of the suggestions
           this.displayStdout(elem, suggestions.join(" "));
-          // reset the prompt
           this.resetPrompt(elem, prompt, false)
-          // then add back on the text that was already being typed
           const newPrompt = document.querySelector("[contenteditable=true]");
           newPrompt.textContent = existingText
           var range = document.createRange();
